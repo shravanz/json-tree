@@ -1,0 +1,18 @@
+.node__root > circle {
+    fill: #1e4572;
+    r:20;
+  }
+  
+  .node__branch > circle {
+    fill:rgb(102, 197, 216);
+    stroke:black
+  }
+  
+  .node__leaf > circle {
+    fill: black;
+  }
+
+  .custom-link {
+    stroke-width: 2px; /* Increase the line thickness */
+  }
+  
