@@ -28,10 +28,15 @@
 
 .tree-container {
   flex: 0.6; /* Increased size of the tree container */
-  padding: 10px;
+  padding: 0px;
   position: relative;
   width: 100%;
   height: 100%;
+  border: 1px solid grey;
+  border-radius: 8px; 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+  background-color: #f9f9f9; 
+  overflow: hidden; /* Ensure that the tree does not overflow the container */
 }
 
 textarea {
@@ -78,6 +83,7 @@ select:hover {
 }
 
 .error-message {
-  color: red;
-  margin-top: 10px;
+  color: rgb(244, 4, 4);
+  margin-top: 20px;
+  margin-left: 20px;
 }

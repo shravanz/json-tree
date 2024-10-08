@@ -11,7 +11,7 @@ const TreeVisualizer = ({ data, pathFunc }) => {
     if (treeContainerRef.current) {
       const { width, height } = treeContainerRef.current.getBoundingClientRect();
       // Set x close to the left (10% of width) and y centered vertically
-      setTranslate({ x: width / 9, y: height / 2 }); // Adjust x or y values as necessary
+      setTranslate({ x: width / 4, y: height / 2 }); // Adjust x or y values as necessary
     }
   }, []);
 

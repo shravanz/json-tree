@@ -87,14 +87,14 @@ const App = () => {
               <option value="step">Step</option>
             </select>
           </div>
-          {errorMessage && <p className="error-message">{errorMessage}</p>}
+          {/* {errorMessage && <p className="error-message">{errorMessage}</p>} */}
         </div>
 
         <div className="tree-container">
           {treeData ? (
             <TreeVisualizer data={treeData} pathFunc={pathFunc} />
           ) : (
-            <p>{errorMessage}</p>
+            <p className="error-message">{errorMessage}</p>
           )}
         </div>
       </div>
