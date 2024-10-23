@@ -21,3 +21,92 @@ export const generatePdf = (elementId) => {
 
     pdf.save('page.pdf');
   });
+//===============================================================================================================================================================
+import React, { useEffect } from "react";
+import { Chart as ChartJS, registerables } from "chart.js";
+import { ColorBlindnessDevtool } from "@color-blindness-devtool/react";
+import { CategoryScale } from "chart.js";
+import { removeGithubLink } from "./removeGithubLink";
+import { adjustTooltipPosition } from "./adjustTooltipPosition";
+import "./ColorblindMode.css"; // Import custom CSS
+
+ChartJS.register(...registerables, CategoryScale);
+
+const ColorblindMode: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  useEffect(() => {
+    adjustTooltipPosition();
+    removeGithubLink();
+  }, []);
+
+  return (
+    <ColorBlindnessDevtool>
+      <div id="chart-container">{children}</div>
+    </ColorBlindnessDevtool>
+  );
+};
+
+export default ColorblindMode;
+//==============================================================================================================================================================
+import React from "react";
+import { Bar } from "react-chartjs-2";
+import ColorblindMode from "./ColorblindMode";
+
+const data = {
+  labels: ["January", "February", "March", "April", "May", "June", "July"],
+  datasets: [
+    {
+      label: "Dataset 1",
+      data: [65, 59, 80, 81, 56, 55, 40],
+      backgroundColor: "#E74C3C",
+      borderColor: "#C0392B",
+      borderWidth: 1,
+    },
+    {
+      label: "Dataset 2",
+      data: [45, 39, 60, 61, 46, 35, 20],
+      backgroundColor: "#3498DB",
+      borderColor: "#2980B9",
+      borderWidth: 1,
+    },
+    {
+      label: "Dataset 3",
+      data: [75, 69, 90, 91, 66, 65, 50],
+      backgroundColor: "#2ECC71",
+      borderColor: "#27AE60",
+      borderWidth: 1,
+    },
+  ],
+};
+
+const App: React.FC = () => {
+  return (
+    <ColorblindMode>
+      <div>
+        <h1 style={{ textAlign: "center" }}>Colorblind Mode Example</h1>
+        <Bar
+          data={data}
+          options={{ responsive: true }}
+          className="chart"
+          id="chart1"
+        />
+      </div>
+    </ColorblindMode>
+  );
+};
+
+export default App;
+//============================================================================================================================================================
+export const removeGithubLink = () => {
+    setTimeout(() => {
+      const shadowRoot = document.querySelector('color-blindness-devtool')?.shadowRoot;
+      if (shadowRoot) {
+        const githubLink = shadowRoot.querySelector('.github-link');
+        if (githubLink) {
+          githubLink.remove();
+        }
+      }
+    }, 1000); // Delay to ensure the shadow DOM is rendered
+  };
+   
