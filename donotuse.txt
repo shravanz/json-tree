@@ -109,4 +109,284 @@ export const removeGithubLink = () => {
       }
     }, 1000); // Delay to ensure the shadow DOM is rendered
   };
+//==========================================================Home Page DevEase==================================================================================
+/*App.tsx*/
+import React, { useState } from "react";
+import ConfettiExplosion from "react-confetti-explosion";
+import {
+  Eye,
+  Code,
+  FileJson,
+  FileCog,
+  Sparkles,
+  ArrowRight,
+} from "lucide-react";
+import "./App.css";
+// import "./HomePage.scss";
+
+interface UtilityCard {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  url: string;
+}
+
+const utilityCards: UtilityCard[] = [
+  {
+    title: "JSON Visualizer",
+    description:
+      "Visualize your JSON data in a tree-like structure for easy navigation.",
+    icon: <Eye className="h-6 w-6" />,
+    url: "/json-visualizer",
+  },
+  {
+    title: "JSON Parser",
+    description:
+      "Parse and validate your JSON data with detailed error reporting.",
+    icon: <Code className="h-6 w-6" />,
+    url: "/json-parser",
+  },
+  {
+    title: "JSON to XML Converter",
+    description:
+      "Convert your JSON data to XML format with customizable options.",
+    icon: <FileJson className="h-6 w-6" />,
+    url: "/json-to-xml",
+  },
+  {
+    title: "JSON Formatter",
+    description:
+      "Format and beautify your JSON data with customizable indentation.",
+    icon: <FileCog className="h-6 w-6" />,
+    url: "/json-formatter",
+  },
+  {
+    title: "JSON Formatter2",
+    description:
+      "Format and beautify your JSON data with customizable indentation.",
+    icon: <FileCog className="h-6 w-6" />,
+    url: "/json-formatter2",
+  },
+];
+
+export default function App() {
+  const [isExploding, setIsExploding] = useState(false);
+
+  const handleCardClick = (url: string) => {
+    window.location.href = url;
+  };
+
+  const handleExplode = () => {
+    setIsExploding(true);
+    setTimeout(() => setIsExploding(false), 5000); // Reset after 5 seconds
+  };
+
+  return (
+    <div className="home-page">
+      {isExploding && (
+        <div className="confetti-container">
+          <ConfettiExplosion
+            force={0.8}
+            duration={5000}
+            particleCount={300}
+            width={1800}
+            colors={[
+              "#ff0000",
+              "#00ff00",
+              "#0000ff",
+              "#ffff00",
+              "#00ffff",
+              "#ff00ff",
+            ]}
+          />
+        </div>
+      )}
+      <div className="content">
+        <h1>Welcome to DevWHZ JSON Utilities</h1>
+        <div className="explode-button-container">
+          <button onClick={handleExplode} className="explode-button">
+            <Sparkles className="h-5 w-5" />
+            Explode!
+          </button>
+        </div>
+        <div className="card-grid">
+          {utilityCards.map((card, index) => (
+            <div
+              key={index}
+              className="card"
+              onClick={() => handleCardClick(card.url)}
+            >
+              <div className="card-header">
+                <div className="card-title">
+                  {card.icon}
+                  {card.title}
+                </div>
+              </div>
+              <div className="card-content">
+                <p className="card-description">{card.description}</p>
+              </div>
+              <div className="card-footer">
+                <button className="try-now-button">
+                  Try Now
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+//===================================================Home Page css =========================================================================================
+.home-page {
+  min-height: 100vh;
+  background-image: linear-gradient(to bottom right, #d9e4dd, #fef8e6);
+  /* background-image: linear-gradient(to bottom right, #dbeafe, #e0e7ff); */
+  padding: 3rem 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .home-page {
+    padding: 3rem 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .home-page {
+    padding: 3rem 2rem;
+  }
+}
+
+.confetti-container {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.content {
+  max-width: 80rem;
+  margin: 0 auto;
+  position: relative;
+  z-index: 10;
+}
+
+h1 {
+  font-size: 2.25rem;
+  font-weight: bold;
+  text-align: center;
+  color: #111827;
+  margin-bottom: 1.5rem;
+}
+
+.explode-button-container {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.explode-button {
+  background-image: linear-gradient(to bottom right, #8b5cf6, #ec4899);
+  color: #ffffff;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  box-shadow: 0 4px 6px rgba(218, 10, 10, 0.1);
+  transition: all 0.3s;
+  transition: transform 0.3s;
+}
+
+.explode-button:hover {
+  transform: scale(1.05);
+  background-image: linear-gradient(to bottom right, #7c3aed, #db2777);
+}
+
+.explode-button svg {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .card-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.card {
+  background-color: #f7f7f7;
+  border: 1px solid #e6e6e6;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s;
+  cursor: pointer;
+}
+
+.card:hover {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  padding: 1.5rem 1.5rem 0.75rem;
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.card-content {
+  padding: 0 1.5rem 1.5rem;
+}
+
+.card-description {
+  color: #6b7280;
+}
+
+.card-footer {
+  padding: 1.5rem;
+}
+
+.try-now-button {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  background-color: #3b82f6;
+  color: #ffffff;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  transition: background-color 0.3s;
+}
+
+.try-now-button:hover {
+  background-color: #2563eb;
+}
+
+.try-now-button svg {
+  margin-left: 0.5rem;
+}
+
+
    
