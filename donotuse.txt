@@ -388,5 +388,112 @@ h1 {
   margin-left: 0.5rem;
 }
 
+////////////////////////////////////////////////////////// JSON PARSER //////////////////////////////////////////////////////////////////////
+import React, { useState } from "react";
+import "./App.css";
+
+const App: React.FC = () => {
+  const [input, setInput] = useState("");
+  const [output, setOutput] = useState("");
+
+  const handleParseJson = () => {
+    try {
+      const normalizedInput = input
+        .replace(/\\"/g, '"')
+        .replace(/\\n/g, "\n")
+        .replace(/\\r/g, "\r")
+        .replace(/^"|"$/g, "");
+      const parsed = JSON.parse(normalizedInput);
+      setOutput(JSON.stringify(parsed, null, 2));
+    } catch (error) {
+      setOutput("Invalid JSON format");
+    }
+  };
+
+  const handleClear = () => {
+    setInput("");
+    setOutput("");
+  };
+
+  return (
+    <div className="container">
+      <h1 className="title">JSON Parser</h1>
+      <div className="content">
+        <textarea
+          className="text-area"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Enter JSON stringified input here"
+        />
+        <div className="buttons">
+          <button className="parse-button" onClick={handleParseJson}>
+            Parse JSON
+          </button>
+          <button className="clear-button" onClick={handleClear}>
+            Clear
+          </button>
+        </div>
+        <textarea
+          className="text-area"
+          value={output}
+          readOnly
+          placeholder="Parsed JSON output will appear here"
+        />
+      </div>
+    </div>
+  );
+};
+
+export default App;
+/////////////////////////////////////////////////////// JSON PARSER CSS //////////////////////////////////////////////////////////////////////
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 50px;
+}
+
+.title {
+  color: blue;
+  margin-bottom: 20px;
+}
+
+.content {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.text-area {
+  width: 450px;
+  height: 400px;
+  margin: 0 20px;
+}
+
+.parse-button, .clear-button {
+  padding: 10px 20px;
+  cursor: pointer;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  margin: 10px;
+  box-sizing: border-box;
+}
+
+.parse-button {
+  background-color: green;
+}
+
+.clear-button {
+  background-color: rgb(236, 59, 59);
+}
+
+.buttons { 
+display: flex; 
+flex-direction: column; 
+align-items: center; 
+margin-bottom: 20px; 
+}
 
    
