@@ -496,5 +496,179 @@ flex-direction: column;
 align-items: center; 
 margin-bottom: 20px; 
 }
+////////////////////////////////////////////////// Proto buffers /////////////////////////////////////////////////////////////////
+/// Server.js
+const express = require("express");
+const protobuf = require("protobufjs");
+const cors = require("cors");
+const app = express();
+app.use(cors()); // Enable CORS for React app
+// Load .proto file
+protobuf.load("./user.proto", (err, root) => {
+  if (err) throw err;
+  const UserList = root.lookupType("UserList");
+  // Generate 1000 users for the larger dataset
+  const generateUserData = () => {
+    const users = [];
+    for (let i = 1; i <= 200000; i++) {
+      users.push({
+        id: `${i}`,
+        name: `User ${i}`,
+        email: `user${i}@example.com`,
+        address: {
+          street: `${i} Main St`,
+          city: `${i} Anytown`,
+          state: `CA ${i}`,
+          zip: `${i}`,
+        },
+        phoneNumbers: [
+          { type: "home", number: `123-456-78${i}` },
+          { type: "mobile", number: `987-654-32${i}` },
+        ],
+      });
+    }
+    return users;
+  };
+  const userData = { users: generateUserData() };
+  // API: Get JSON
+  app.get("/json", (req, res) => {
+    res.json(userData);
+  });
+  // API: Get Protobuf-encoded data
+  app.get("/protobuf", (req, res) => {
+    const buffer = UserList.encode({ users: userData.users }).finish();
+    res.set("Content-Type", "application/octet-stream");
+    res.send(buffer);
+  });
+  app.listen(3001, () =>
+    console.log("Server running on http://localhost:3001")
+  );
+});
+//---------------------------------------- ----------App.js (react App)
+import  { useEffect, useState } from "react";
+import protobuf from "protobufjs";
 
-   
+const App = () => {
+  const [stats, setStats] = useState({
+    json: { size: 0, fetchTime: 0, parseTime: 0 },
+    protobuf: { size: 0, fetchTime: 0, parseTime: 0 },
+  });
+
+  useEffect(() => {
+    const fetchAndCompare = async () => {
+      // JSON Fetch & Stats
+      const jsonStartTime = performance.now();
+      const jsonResponse = await fetch("http://localhost:3001/json");
+      const jsonFetchTime = performance.now() - jsonStartTime;
+      const jsonData = await jsonResponse.json();
+      const jsonParseTime = performance.now() - (jsonStartTime + jsonFetchTime);
+      const jsonSize = new Blob([JSON.stringify(jsonData)]).size;
+
+      // Protobuf Fetch & Stats
+      const protoStartTime = performance.now();
+      const protoResponse = await fetch("http://localhost:3001/protobuf");
+      const protoFetchTime = performance.now() - protoStartTime;
+      const protoBuffer = await protoResponse.arrayBuffer();
+      const protoParseStartTime = performance.now();
+      const root = await protobuf.load("/user.proto");
+      const SomeMessage = root.lookupType("UserList");
+      // eslint-disable-next-line no-unused-vars
+      const protoData = SomeMessage.decode(new Uint8Array(protoBuffer));
+      const protoParseTime = performance.now() - protoParseStartTime;
+      const protoSize = protoBuffer.byteLength;
+
+      // Update Stats
+      setStats({
+        json: { size: jsonSize, fetchTime: jsonFetchTime, parseTime: jsonParseTime },
+        protobuf: { size: protoSize, fetchTime: protoFetchTime, parseTime: protoParseTime },
+      });
+    };
+
+    fetchAndCompare();
+  }, []);
+
+  return (
+    <div className="p-6">
+      <h1 className="text-3xl font-bold mb-6">JSON vs Protobuf: Performance Comparison</h1>
+
+      <table className="table-auto border-collapse border border-gray-400 w-full">
+        <thead>
+          <tr>
+            <th className="border border-gray-300 px-6 py-6">Metric</th>
+            <th className="border border-gray-300 px-6 py-6">JSON</th>
+            <th className="border border-gray-300 px-6 py-6">Protobuf</th>
+            <th className="border border-gray-300 px-6 py-6">Better</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td className="border border-gray-300 px-6 py-4">Data Size (Bytes)</td>
+            <td className="border border-gray-300 px-6 py-4">{stats.json.size} B</td>
+            <td className="border border-gray-300 px-6 py-4">{stats.protobuf.size} B</td>
+            <td className="border border-gray-300 px-6 py-4">
+              {stats.json.size > stats.protobuf.size ? "Protobuf" : "JSON"}
+            </td>
+          </tr>
+          <tr>
+            <td className="border border-gray-300 px-4 py-2">Fetch Time (ms)</td>
+            <td className="border border-gray-300 px-4 py-2">{stats.json.fetchTime.toFixed(2)} ms</td>
+            <td className="border border-gray-300 px-4 py-2">{stats.protobuf.fetchTime.toFixed(2)} ms</td>
+            <td className="border border-gray-300 px-4 py-2">
+              {stats.json.fetchTime > stats.protobuf.fetchTime ? "Protobuf" : "JSON"}
+            </td>
+          </tr>
+          <tr>
+            <td className="border border-gray-300 px-4 py-2">Parse Time (ms)</td>
+            <td className="border border-gray-300 px-4 py-2">{stats.json.parseTime.toFixed(2)} ms</td>
+            <td className="border border-gray-300 px-4 py-2">{stats.protobuf.parseTime.toFixed(2)} ms</td>
+            <td className="border border-gray-300 px-4 py-2">
+              {stats.json.parseTime > stats.protobuf.parseTime ? "Protobuf" : "JSON"}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div className="mt-6">
+        <h2 className="text-xl font-semibold">Observations:</h2>
+        <ul className="list-disc ml-6 mt-2">
+          <li>
+            Protobuf generally performs better in terms of size and fetch time
+            because of its compact binary format.
+          </li>
+          <li>
+            JSON is human-readable and easier to debug, but it incurs a
+            performance penalty in size and parsing speed.
+          </li>
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+export default App;
+//////////////////////////////////////////////////////////// USER.PROTO file ///////////////////////////////////////////////
+syntax = "proto3";
+
+message Address {
+  string street = 1;
+  string city = 2;
+  string state = 3;
+  string zip = 4;
+}
+
+message PhoneNumber {
+  string type = 1;
+  string number = 2;
+}
+
+message User {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  Address address = 4;
+  repeated PhoneNumber phoneNumbers = 5;
+}
+
+message UserList {
+  repeated User users = 1;
+}
