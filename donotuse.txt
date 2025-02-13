@@ -672,3 +672,233 @@ message User {
 message UserList {
   repeated User users = 1;
 }
+/////////////////////////////////////////////////////////// Text Compare ///////////////////////////////////////////////////
+TextCompare.tsx
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useState } from "react";
+import { diffChars, diffWords, diffLines } from "diff";
+import "./TextCompare.css";
+
+const TextCompare: React.FC = () => {
+  const [text1, setText1] = useState("");
+  const [text2, setText2] = useState("");
+  const [diffs, setDiffs] = useState<React.ReactNode[]>([]);
+  const [compareType, setCompareType] = useState("line");
+
+  const handleCompare = () => {
+    let diffResult;
+    switch (compareType) {
+      case "char":
+        diffResult = diffChars(text1, text2);
+        break;
+      case "word":
+        diffResult = diffWords(text1, text2);
+        break;
+      case "line":
+      default:
+        diffResult = diffLines(text1, text2);
+        break;
+    }
+
+    const diffElements = diffResult.map((part, index) => {
+      const className = part.added
+        ? "insert"
+        : part.removed
+        ? "delete"
+        : "normal";
+      return (
+        <span key={index} className={className}>
+          {part.value}
+        </span>
+      );
+    });
+
+    setDiffs(diffElements);
+  };
+
+  const handleClearAll = () => {
+    setText1("");
+    setText2("");
+    setDiffs([]);
+  };
+
+  const handleSwitch = () => {
+    const tempText = text1;
+    setText1(text2);
+    setText2(tempText);
+  };
+
+  return (
+    <div className="container">
+      <div className="textarea-container">
+        <textarea
+          className="textarea"
+          value={text1}
+          onChange={(e) => setText1(e.target.value)}
+          placeholder="Enter first text here..."
+        />
+        <textarea
+          className="textarea"
+          value={text2}
+          onChange={(e) => setText2(e.target.value)}
+          placeholder="Enter second text here..."
+        />
+      </div>
+      <div className="radio-container">
+        <label>
+          <input
+            type="radio"
+            value="char"
+            checked={compareType === "char"}
+            onChange={() => setCompareType("char")}
+          />
+          Char
+        </label>
+        <label>
+          <input
+            type="radio"
+            value="word"
+            checked={compareType === "word"}
+            onChange={() => setCompareType("word")}
+          />
+          Word
+        </label>
+        <label>
+          <input
+            type="radio"
+            value="line"
+            checked={compareType === "line"}
+            onChange={() => setCompareType("line")}
+          />
+          Line
+        </label>
+      </div>
+      <div className="button-container">
+        <button className="compare-button" onClick={handleCompare}>
+          Compare
+        </button>
+        <button className="clear-button" onClick={handleClearAll}>
+          Clear All
+        </button>
+        <button className="switch-button" onClick={handleSwitch}>
+          Switch
+        </button>
+      </div>
+      <div className="diff-view">{diffs}</div>
+    </div>
+  );
+};
+
+export default TextCompare;
+/////////////////////////////////////////////////////////////// textCompare.css////////////////////////////////////////////////////////////////////////////
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px;
+  }
+  
+  .textarea-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  .textarea {
+    width: 45%;
+    height: 350px; /* Increased height for larger text */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    overflow-y: auto; /* Make textarea scrollable */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow for better visuals */
+    margin-left: 5px;
+  }
+  
+  .radio-container {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
+  }
+  
+  .radio-container label {
+    margin: 0 10px;
+    font-size: 16px;
+  }
+  
+  .button-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+  }
+  
+  .compare-button,
+  .clear-button,
+  .switch-button {
+    padding: 10px 20px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 0 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow for buttons */
+    transition: background-color 0.3s, box-shadow 0.3s; /* Smooth transitions */
+  }
+  
+  .compare-button {
+    background-color: #007bff;
+  }
+  
+  .compare-button:hover {
+    background-color: #0056b3;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2); /* Add hover effect */
+  }
+  
+  .clear-button {
+    background-color: #dc3545;
+  }
+  
+  .clear-button:hover {
+    background-color: #c82333;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2); /* Add hover effect */
+  }
+  
+  .switch-button {
+    background-color: #ffc107;
+  }
+  
+  .switch-button:hover {
+    background-color: #e0a800;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2); /* Add hover effect */
+  }
+  
+  .diff-view {
+    width: 80%;
+    height: 300px; /* Make the diff view scrollable */
+    margin-top: 20px;
+    white-space: pre-wrap; /* Keep the formatting of spaces and new lines */
+    overflow-y: auto; /* Make diff view scrollable */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow for better visuals */
+    background-color: #f9f9f9; /* Light background for better readability */
+  }
+  
+  .diff-view .insert {
+    background-color: rgb(84, 212, 84);
+    color: white;
+  }
+  
+  .diff-view .delete {
+    background-color: rgb(228, 67, 67);
+    color: white;
+  }
+  
+  .diff-view .normal {
+    background-color: transparent;
+    color: black;
+  }
