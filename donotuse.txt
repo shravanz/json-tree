@@ -674,7 +674,6 @@ message UserList {
 }
 /////////////////////////////////////////////////////////// Text Compare ///////////////////////////////////////////////////
 TextCompare.tsx
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import { diffChars, diffWords, diffLines } from "diff";
 import "./TextCompare.css";
@@ -684,19 +683,28 @@ const TextCompare: React.FC = () => {
   const [text2, setText2] = useState("");
   const [diffs, setDiffs] = useState<React.ReactNode[]>([]);
   const [compareType, setCompareType] = useState("line");
+  const [caseSensitive, setCaseSensitive] = useState(true);
 
   const handleCompare = () => {
     let diffResult;
+    let compareText1 = text1;
+    let compareText2 = text2;
+
+    if (!caseSensitive) {
+      compareText1 = text1.toLowerCase();
+      compareText2 = text2.toLowerCase();
+    }
+
     switch (compareType) {
       case "char":
-        diffResult = diffChars(text1, text2);
+        diffResult = diffChars(compareText1, compareText2);
         break;
       case "word":
-        diffResult = diffWords(text1, text2);
+        diffResult = diffWords(compareText1, compareText2);
         break;
       case "line":
       default:
-        diffResult = diffLines(text1, text2);
+        diffResult = diffLines(compareText1, compareText2);
         break;
     }
 
@@ -773,6 +781,16 @@ const TextCompare: React.FC = () => {
           Line
         </label>
       </div>
+      <div className="toggle-container">
+        <label>
+          <input
+            type="checkbox"
+            checked={caseSensitive}
+            onChange={() => setCaseSensitive(!caseSensitive)}
+          />
+          Case Sensitive
+        </label>
+      </div>
       <div className="button-container">
         <button className="compare-button" onClick={handleCompare}>
           Compare
@@ -790,6 +808,7 @@ const TextCompare: React.FC = () => {
 };
 
 export default TextCompare;
+
 /////////////////////////////////////////////////////////////// textCompare.css////////////////////////////////////////////////////////////////////////////
 .container {
     display: flex;
@@ -902,3 +921,17 @@ export default TextCompare;
     background-color: transparent;
     color: black;
   }
+
+  /* TextCompare.css */
+
+.toggle-container {
+  display: flex;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.toggle-container label {
+  font-size: 16px;
+  margin-left: 10px;
+}
+  
